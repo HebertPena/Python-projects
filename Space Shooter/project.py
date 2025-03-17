@@ -1,5 +1,5 @@
 # Example file showing a basic pygame "game loop"
-import pygame, os, time, random
+import pygame, os, random
 from constants import WIDTH, HEIGHT, BG, PLAYER_DEATH, HIT
 from ships import Player, Enemy, collide
 
@@ -32,10 +32,11 @@ def main():
     lost = False
     lost_count = 0
 
-    # Enemies
+    # Enemy list and quantity of enemies in the level 1
     enemies = []
     wave_lenght = 5
 
+    # Instance of the obj player
     player = Player(620, 650)
 
     # Function to update the screen with the background
@@ -49,11 +50,14 @@ def main():
         screen.blit(lives_label, (10, 10))
         screen.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
 
+        # for every enemy in the enemy list, draw them on the screen
         for enemy in enemies:
             enemy.draw(screen)
 
+        # Draw the player ship
         player.draw(screen)
 
+        # conditional if the player lose, play a song and render in the screen a lose message
         if lost:
             pygame.mixer.Sound.play(PLAYER_DEATH)
             lost_label = lost_font.render("You Lost !!", 1, (255, 255, 255))
@@ -85,7 +89,7 @@ def main():
             level += 1
             wave_lenght += 3
             for _ in range(wave_lenght):
-                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-1500, -100), random.choice(["red", "green", "blue"]))
+                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-1200, -100), random.choice(["red", "green", "blue"]))
                 enemies.append(enemy)
 
 
@@ -105,27 +109,33 @@ def main():
             player.y -= player_velocity
         if keys[pygame.K_DOWN] and player.y + player_velocity + player.get_height() + 15 < HEIGHT: #down
             player.y += player_velocity
+
+        # player use the space key to shoot
         if keys[pygame.K_SPACE]:
             player.shoot()
             
 
+        # every enemy in the enemy list moves increasing his Y position and so the bullets
         for enemy in enemies[:]:
             enemy.move(enemy_vel)
             enemy.move_bullets(bullet_vel, player)
 
+            # enemy shoots random in between 0 and 4 seconds.
             if random.randrange(0, 4*FPS) == 1:
                 enemy.shoot()
                 
+            # if enemy collides with the player, enemy dies and player lose 10 health
             if collide(enemy, player):
                 player.health -= 10
                 enemies.remove(enemy)
                 pygame.mixer.Sound.play(HIT)
 
+            # if enemy pass the height of the screen, player loses 1 life and the enemy dies
             elif enemy.y + enemy.get_height() > HEIGHT:
                 lives -= 1
                 enemies.remove(enemy)
 
-
+        # Player bullets have negative direction because they start at the bottom of the screen, and the arguments enemies, is the obj that the player bullet can hit
         player.move_bullets(-bullet_vel, enemies)
 
 # Main menu to show before the game start
@@ -134,10 +144,11 @@ def main_menu():
     title_font = pygame.font.Font(os.path.join("Space Shooter", "assets", "fonts", "PublicPixel.ttf"), 30)
     while run:
         screen.blit(BG, (0,0))
-        title_label = title_font.render("Press Space to begin...", 1, (255,255,255))
+        title_label = title_font.render("Left click to start...", 1, (255,255,255))
         screen.blit(title_label, (WIDTH/2 - title_label.get_width()/2, 400))
         pygame.display.update()
  
+        # Game starts if player press a mouse buttom.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False

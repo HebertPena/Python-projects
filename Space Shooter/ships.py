@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame
 from constants import BULLET_SOUND, HIT, HEIGHT, PLAYER_SHIP, RED_SHIP, GREEN_SHIP, BLUE_SHIP, YELLOW_BULLET, RED_BULLET, GREEN_BULLET, BLUE_BULLET
 
 # Function to detect collision between the masks os obj1 and obj2, if not collision, function return None, if have a collision, returns a tuple of x,y
@@ -7,16 +7,20 @@ def collide(obj1, obj2):
     offset_y = obj2.y - obj1.y
     return obj1.mask.overlap(obj2.mask, (offset_x, offset_y)) != None
 
+# Class for the bullets, have a X, Y position and a image.
 class Bullet:
     def __init__(self, x, y, img):
         self.x = x
         self.y = y
         self.img = img
+        #mask for better collision detection
         self.mask = pygame.mask.from_surface(self.img)
 
+    # function to draw the bullet 
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))
     
+    # function for the direction of the bullet
     def move(self, vel):
         self.y += vel
 
